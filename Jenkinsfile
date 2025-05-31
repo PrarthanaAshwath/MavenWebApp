@@ -7,7 +7,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/PrarthanaAshwath/ansible.git'
+                git 'https://github.com/PrarthanaAshwath/AnsibleWebApp.git'
             }
         }
 
