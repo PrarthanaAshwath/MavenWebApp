@@ -7,7 +7,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/PrarthanaAshwath/MavenWebApp.git'
+                git branch: 'master', url: 'https://github.com/PrarthanaAshwath/PracticeMavZen.git'
             }
         }
 
@@ -17,19 +17,31 @@ pipeline {
             }
         }
 
-        stage('Archive') {
+        stage('Test') {
             steps {
-                archiveArtifacts artifacts:'target/*.war',fingerprint:true
+                sh 'mvn test'  // Run unit tests
             }
         }
+
+        
+        
        
-        stage('Deploy') {
+        stage('Run Application') {
             steps {
-                sh 'mvn clean package'
-                ansiblePlaybook playbook:'ansible/deploy.yml',inventory:'ansible/hosts.ini'
+                // Start the JAR application
+                sh 'java -jar target/PracticeMavZen-1.0-SNAPSHOT.jar'
             }
         }
 
         
     }
-    
+
+    post {
+        success {
+            echo 'Build and deployment successful!'
+        }
+        failure {
+            echo 'Build failed!'
+        }
+    }
+}
