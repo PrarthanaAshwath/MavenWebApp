@@ -2,12 +2,12 @@ pipeline {
     agent any  // Use any available agent
 
     tools {
-        maven 'maven'  // Ensure this matches the name configured in Jenkins
+        maven 'Maven'  // Ensure this matches the name configured in Jenkins
     }
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'master', url: 'https://github.com/PrarthanaAshwath/PracticeMavZen.git'
+                git 'https://github.com/PrarthanaAshwath/MavenWebApp.git'
             }
         }
 
@@ -17,19 +17,65 @@ pipeline {
             }
         }
 
-        stage('Test') {
+        stage('Archive') {
             steps {
-                sh 'mvn test'  // Run unit tests
+                archiveArtifacts artifacts:'target/*.war', fingerprint=true
             }
         }
 
         
         
        
-        stage('Run Application') {
+        stage('Deploy') {
             steps {
-                // Start the JAR application
-                sh 'java -jar target/PracticeMavZen-1.0-SNAPSHOT.jar'
+                sh 'mvn clean package'
+                ansiblePlaybook playbook:'ansible/deploy.yml',inventory:'ansible/hosts.ini'
+            }
+        }
+
+        
+    }
+
+    post {
+        success {
+            echo 'Build and deployment successful!'
+        }
+        failure {
+            echo 'Build failed!'
+        }
+    }
+}pipeline {
+    agent any  // Use any available agent
+
+    tools {
+        maven 'Maven'  // Ensure this matches the name configured in Jenkins
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/PrarthanaAshwath/MavenWebApp.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'  // Run Maven build
+            }
+        }
+
+        stage('Archive') {
+            steps {
+                archiveArtifacts artifacts:'target/*.war', fingerprint=true
+            }
+        }
+
+        
+        
+       
+        stage('Deploy') {
+            steps {
+                sh 'mvn clean package'
+                ansiblePlaybook playbook:'ansible/deploy.yml',inventory:'ansible/hosts.ini'
             }
         }
 
